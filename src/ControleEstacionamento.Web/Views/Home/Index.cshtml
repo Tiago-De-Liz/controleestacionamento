@@ -1,0 +1,202 @@
+@model IEnumerable<ControleEstacionamento.Application.DTOs.VeiculoResponseDto>
+@{
+    ViewData["Title"] = "Painel";
+    var tabelaVigente = ViewBag.TabelaVigente as ControleEstacionamento.Application.DTOs.TabelaPrecoDto;
+    var totalVeiculos = (int)ViewBag.TotalVeiculos;
+}
+
+@Html.AntiForgeryToken()
+
+<div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-900">Painel de Controle</h1>
+    <p class="text-gray-600 mt-1">Visão geral do estacionamento</p>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Veículos Estacionados</p>
+                <p id="contadorVeiculos" class="text-2xl font-bold text-gray-900">@totalVeiculos</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100 text-green-600">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Hora Inicial</p>
+                <p class="text-2xl font-bold text-gray-900">
+                    @(tabelaVigente != null ? $"R$ {tabelaVigente.ValorHoraInicial:F2}" : "N/A")
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-500">Hora Adicional</p>
+                <p class="text-2xl font-bold text-gray-900">
+                    @(tabelaVigente != null ? $"R$ {tabelaVigente.ValorHoraAdicional:F2}" : "N/A")
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (tabelaVigente == null)
+{
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-yellow-700">
+                    <strong>Atenção:</strong> Não há tabela de preços vigente.
+                    <a asp-controller="TabelaPrecos" asp-action="Criar" class="font-medium underline">Clique aqui para cadastrar</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="flex justify-between items-center mb-4">
+    <div class="flex items-center space-x-4">
+        <h2 class="text-xl font-bold text-gray-900">Veículos Estacionados</h2>
+        <!-- Controles de refresh -->
+        <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+            <button id="btnAutoRefreshPainel"
+                    onclick="toggleAutoRefreshPainel()"
+                    class="p-2 rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                    title="Auto-refresh ativo (clique para desativar)">
+                <svg id="refreshIconPainel" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+            </button>
+            <button onclick="manualRefreshPainel()"
+                    class="p-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+                    title="Atualizar agora">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+            </button>
+        </div>
+        <span id="lastUpdatePainel" class="text-sm text-gray-500">Atualizado às @DateTime.Now.ToString("HH:mm:ss")</span>
+    </div>
+    <a asp-controller="Veiculos" asp-action="Entrada" class="btn btn-primary">
+        + Registrar Entrada
+    </a>
+</div>
+
+<div id="painelVeiculosContainer" class="bg-white rounded-lg shadow-md overflow-hidden">
+    @await Html.PartialAsync("_PainelVeiculos", Model)
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-refresh específico do Painel
+        let painelRefreshInterval = null;
+
+        function startAutoRefreshPainel(intervalMs = 60000) {
+            if (painelRefreshInterval) {
+                clearInterval(painelRefreshInterval);
+            }
+            painelRefreshInterval = setInterval(() => {
+                refreshPainelTable();
+            }, intervalMs);
+            updateRefreshStatusPainel(true);
+        }
+
+        function stopAutoRefreshPainel() {
+            if (painelRefreshInterval) {
+                clearInterval(painelRefreshInterval);
+                painelRefreshInterval = null;
+            }
+            updateRefreshStatusPainel(false);
+        }
+
+        function toggleAutoRefreshPainel() {
+            if (painelRefreshInterval) {
+                stopAutoRefreshPainel();
+            } else {
+                startAutoRefreshPainel();
+            }
+        }
+
+        function updateRefreshStatusPainel(active) {
+            const btn = document.getElementById('btnAutoRefreshPainel');
+            const icon = document.getElementById('refreshIconPainel');
+            if (btn) {
+                if (active) {
+                    btn.classList.remove('bg-gray-200', 'text-gray-700');
+                    btn.classList.add('bg-green-100', 'text-green-700');
+                    btn.title = 'Auto-refresh ativo (clique para desativar)';
+                    if (icon) icon.classList.add('animate-spin');
+                } else {
+                    btn.classList.remove('bg-green-100', 'text-green-700');
+                    btn.classList.add('bg-gray-200', 'text-gray-700');
+                    btn.title = 'Auto-refresh inativo (clique para ativar)';
+                    if (icon) icon.classList.remove('animate-spin');
+                }
+            }
+        }
+
+        async function refreshPainelTable() {
+            try {
+                // Atualiza a tabela
+                const response = await fetch('/Home/ListarVeiculosPartial');
+                if (response.ok) {
+                    const html = await response.text();
+                    const container = document.getElementById('painelVeiculosContainer');
+                    if (container) {
+                        container.innerHTML = html;
+                    }
+                }
+
+                // Atualiza o contador
+                const countResponse = await fetch('/Home/ContarVeiculos');
+                if (countResponse.ok) {
+                    const data = await countResponse.json();
+                    const contador = document.getElementById('contadorVeiculos');
+                    if (contador) {
+                        contador.textContent = data.total;
+                    }
+                }
+
+                // Atualiza timestamp
+                document.getElementById('lastUpdatePainel').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR');
+            } catch (error) {
+                console.error('Erro ao atualizar painel:', error);
+            }
+        }
+
+        function manualRefreshPainel() {
+            refreshPainelTable();
+            showToast('Dados atualizados!', 'success');
+        }
+
+        // Inicia auto-refresh ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            startAutoRefreshPainel();
+        });
+    </script>
+}

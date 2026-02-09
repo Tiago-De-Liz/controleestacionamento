@@ -1,0 +1,65 @@
+@model IEnumerable<ControleEstacionamento.Application.DTOs.VeiculoResponseDto>
+@{
+    ViewData["Title"] = "Veículos Estacionados";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-3xl font-bold text-gray-900">Veículos Estacionados</h1>
+        <p class="text-gray-600 mt-1">Gerencie os veículos atualmente no estacionamento</p>
+    </div>
+    <div class="flex items-center space-x-3">
+        <!-- Botões de controle de refresh -->
+        <div class="flex items-center space-x-2 bg-gray-100 rounded-lg p-1">
+            <button id="btnAutoRefresh"
+                    onclick="toggleAutoRefresh()"
+                    class="p-2 rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                    title="Auto-refresh ativo (clique para desativar)">
+                <svg id="refreshIcon" class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+            </button>
+            <button onclick="manualRefresh()"
+                    class="p-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors"
+                    title="Atualizar agora">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+            </button>
+        </div>
+
+        <a asp-action="Entrada" class="btn btn-primary">
+            + Registrar Entrada
+        </a>
+    </div>
+</div>
+
+<!-- Contador de veículos -->
+<div class="mb-4 flex items-center space-x-4">
+    <div class="bg-blue-50 rounded-lg px-4 py-2 flex items-center space-x-2">
+        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+        </svg>
+        <span class="text-blue-800 font-medium">@Model.Count() veículo(s) estacionado(s)</span>
+    </div>
+    <div class="text-sm text-gray-500">
+        <span id="lastUpdate">Atualizado às @DateTime.Now.ToString("HH:mm:ss")</span>
+    </div>
+</div>
+
+<div id="veiculosTableContainer" class="bg-white rounded-lg shadow-md overflow-hidden">
+    @await Html.PartialAsync("_VeiculosTable", Model)
+</div>
+
+@section Scripts {
+    <script>
+        // Atualizar timestamp quando a tabela for atualizada
+        const originalRefresh = refreshVeiculosTable;
+        refreshVeiculosTable = async function() {
+            await originalRefresh();
+            document.getElementById('lastUpdate').textContent = 'Atualizado às ' + new Date().toLocaleTimeString('pt-BR');
+        };
+    </script>
+}

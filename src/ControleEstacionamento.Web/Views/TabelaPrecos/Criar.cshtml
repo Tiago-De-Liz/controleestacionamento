@@ -1,0 +1,60 @@
+@model ControleEstacionamento.Application.DTOs.TabelaPrecoCreateDto
+@{
+    ViewData["Title"] = "Nova Tabela de Preço";
+}
+
+<div class="max-w-lg mx-auto">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Nova Tabela de Preço</h1>
+        <p class="text-gray-600 mt-1">Defina os valores e período de vigência</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form asp-action="Criar" method="post">
+            <div asp-validation-summary="ModelOnly" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"></div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label asp-for="DataInicioVigencia" class="form-label">Data Início</label>
+                    <input asp-for="DataInicioVigencia" type="date" class="form-input" />
+                    <span asp-validation-for="DataInicioVigencia" class="text-red-500 text-sm"></span>
+                </div>
+                <div>
+                    <label asp-for="DataFimVigencia" class="form-label">Data Fim</label>
+                    <input asp-for="DataFimVigencia" type="date" class="form-input" />
+                    <span asp-validation-for="DataFimVigencia" class="text-red-500 text-sm"></span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label asp-for="ValorHoraInicial" class="form-label">Valor Hora Inicial (R$)</label>
+                    <input asp-for="ValorHoraInicial" type="number" step="0.01" min="0" class="form-input" placeholder="10.00" />
+                    <span asp-validation-for="ValorHoraInicial" class="text-red-500 text-sm"></span>
+                    <p class="mt-1 text-xs text-gray-500">Cobrado na primeira hora ou fração</p>
+                </div>
+                <div>
+                    <label asp-for="ValorHoraAdicional" class="form-label">Valor Hora Adicional (R$)</label>
+                    <input asp-for="ValorHoraAdicional" type="number" step="0.01" min="0" class="form-input" placeholder="5.00" />
+                    <span asp-validation-for="ValorHoraAdicional" class="text-red-500 text-sm"></span>
+                    <p class="mt-1 text-xs text-gray-500">Cobrado a cada hora adicional</p>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <h4 class="font-medium text-blue-800 mb-2">Regras de Cobrança</h4>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>• Até 30 min: metade da hora inicial</li>
+                    <li>• De 31 a 60 min: hora inicial completa</li>
+                    <li>• Acima de 1h: hora inicial + horas adicionais</li>
+                    <li>• Tolerância: 10 min por hora adicional</li>
+                </ul>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Criar Tabela</button>
+            </div>
+        </form>
+    </div>
+</div>

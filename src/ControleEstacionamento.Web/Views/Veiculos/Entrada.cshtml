@@ -1,0 +1,38 @@
+@model ControleEstacionamento.Application.DTOs.VeiculoEntradaDto
+@{
+    ViewData["Title"] = "Registrar Entrada";
+}
+
+<div class="max-w-md mx-auto">
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900">Registrar Entrada</h1>
+        <p class="text-gray-600 mt-1">Informe a placa do veículo</p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <form asp-action="Entrada" method="post">
+            <div asp-validation-summary="ModelOnly" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"></div>
+
+            <div class="mb-4">
+                <label asp-for="Placa" class="form-label">Placa do Veículo</label>
+                <input asp-for="Placa" class="form-input text-center text-2xl font-mono uppercase tracking-widest"
+                       placeholder="ABC1D23" maxlength="7" autocomplete="off" autofocus />
+                <span asp-validation-for="Placa" class="text-red-500 text-sm"></span>
+                <p class="mt-1 text-sm text-gray-500">Formato: ABC1234 ou ABC1D23 (Mercosul)</p>
+            </div>
+
+            <div class="flex justify-between items-center mt-6">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Registrar Entrada</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelector('input[name="Placa"]').addEventListener('input', function(e) {
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        });
+    </script>
+}

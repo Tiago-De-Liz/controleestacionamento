@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Controle de Estacionamento</title>
+    <link rel="stylesheet" href="~/css/app.min.css" asp-append-version="true" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-blue-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a asp-controller="Home" asp-action="Index" class="flex items-center text-white font-bold text-xl">
+                        <svg class="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                        </svg>
+                        Estacionamento
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a asp-controller="Home" asp-action="Index" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Painel
+                    </a>
+                    <a asp-controller="Veiculos" asp-action="Index" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Veículos
+                    </a>
+                    <a asp-controller="Veiculos" asp-action="Historico" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Histórico
+                    </a>
+                    <a asp-controller="Relatorios" asp-action="Index" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Relatórios
+                    </a>
+                    <a asp-controller="TabelaPrecos" asp-action="Index" class="text-white hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Preços
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto py-6 px-4">
+        @if (TempData["Sucesso"] != null)
+        {
+            <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline">@TempData["Sucesso"]</span>
+            </div>
+        }
+        @if (TempData["Erro"] != null)
+        {
+            <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <span class="block sm:inline">@TempData["Erro"]</span>
+            </div>
+        }
+        @RenderBody()
+    </main>
+
+    <footer class="bg-gray-800 text-white py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 text-center text-sm">
+            &copy; @DateTime.Now.Year - Sistema de Controle de Estacionamento
+        </div>
+    </footer>
+
+    <!-- Modal de Saída Global -->
+    <div id="modalSaida" class="hidden fixed inset-0 z-50 items-center justify-center">
+        <!-- Overlay com transparência mais suave -->
+        <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="closeModal('modalSaida')"></div>
+        <!-- Conteúdo do Modal -->
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 transform transition-all">
+            <!-- Confirmação -->
+            <div id="saidaConfirmacao">
+                <div class="p-6">
+                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-yellow-100 rounded-full mb-4">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 text-center mb-2">Confirmar Saída</h3>
+                    <p class="text-gray-500 text-center">
+                        Deseja registrar a saída do veículo <span id="saidaPlaca" class="font-mono font-bold text-gray-900"></span>?
+                    </p>
+                    <input type="hidden" id="saidaVeiculoId" />
+                </div>
+                <div class="bg-gray-50 px-6 py-3 flex justify-end space-x-3 rounded-b-lg">
+                    <button onclick="closeModal('modalSaida')" class="btn btn-secondary">Cancelar</button>
+                    <button id="btnConfirmarSaida" onclick="processarSaida()" class="btn btn-success">Confirmar Saída</button>
+                </div>
+            </div>
+
+            <!-- Resultado -->
+            <div id="saidaResultado" class="hidden">
+                <div class="p-6">
+                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-green-100 rounded-full mb-4">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 text-center mb-4">Saída Registrada!</h3>
+
+                    <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Placa:</span>
+                            <span id="resultPlaca" class="font-mono font-bold"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Entrada:</span>
+                            <span id="resultEntrada"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Saída:</span>
+                            <span id="resultSaida"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-500">Tempo:</span>
+                            <span id="resultTempo" class="font-medium"></span>
+                        </div>
+                        <div class="flex justify-between border-t pt-3 mt-3">
+                            <span class="text-gray-700 font-medium">Valor Total:</span>
+                            <span id="resultValor" class="text-2xl font-bold text-green-600"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-6 py-3 flex justify-end rounded-b-lg">
+                    <button onclick="fecharSaidaEAtualizar()" class="btn btn-primary">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Fim do Modal -->
+
+    <!-- Token para requisições AJAX -->
+    @Html.AntiForgeryToken()
+
+    <script src="~/js/app.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
